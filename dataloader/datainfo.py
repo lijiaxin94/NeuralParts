@@ -1,19 +1,27 @@
 import os
 import csv
 import numpy as np
-from torch.utils.data import Dataset
-
 from config import *
 
-class dfaust_data():
-    def __init__(self, datainfo):
-        self.data_dir = datainfo[0]
-        self.data_num = datainfo[1]
-
-
-class dfaust_dataset():
-    def __init__(self, splits):
+class Datainfo_base():
+    def __init__(self):
         self.datainfo_list = []
+
+    def __len__(self):
+        return len(self.datainfo_list)
+
+    def __getitem__(self, index):
+        if index >= len(self):
+            raise IndexError()
+        return self.get(index)
+
+    def get(self, index):
+        raise NotImplementedError()
+
+
+class Datainfo_dfaust(Datainfo_base):
+    def __init__(self, splits):
+        super(Datainfo_dfaust, self).__init__()
 
         # get all datainfo in computer
         datainfo_local = []
@@ -36,15 +44,7 @@ class dfaust_dataset():
             if info in datainfo_split:
                 self.datainfo_list.append(info.split(":"))   
 
-        print("split data into " + str(len(self.datainfo_list)) + " data")     
-
-
-    def __len__(self):
-        return len(self.datainfo_list)
+        print("split data into " + str(len(self.datainfo_list)) + " data")   
 
     def get(self, index):
-        return dfaust_data(self.datainfo_list[i])
-
-
-if __name__=='__main__':
-    print(len(dfaust_dataset(['val'])))
+        return Data_dfaust(self.datainfo_list[index])  
