@@ -1,9 +1,16 @@
 from config import *
 from os.path import join, exists
 import numpy as np
+from PIL import Image
 
 class Data_base():
     def path_to_mesh_file(self):
+        raise NotImplementedError()
+
+    def path_to_surface_samples(self):
+        raise NotImplementedError()
+
+    def path_to_image_file(self):
         raise NotImplementedError()
 
     def get_surface_samples(self):
@@ -30,8 +37,15 @@ class Data_dfaust(Data_base):
         return join(dfaust_dataset_directory, self.data_dir, 
                 dfaust_surface_samples_folder, self.data_num + '.npy')
 
+    def path_to_image_file(self):
+        return join(dfaust_dataset_directory, self.data_dir, 
+                dfaust_image_folder, self.data_num + '.png')
+
     def get_n_surface_samples(self):
         return (dfaust_n_preprocessed_surface_samples, dfaust_n_surface_samples)
+
+    def get_image(self):
+        return np.transpose(np.array(Image.open(self.path_to_image_file())).convert("RGB"))
 
 
     
