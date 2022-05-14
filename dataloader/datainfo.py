@@ -1,7 +1,8 @@
-import os
 import csv
 import numpy as np
 from config import *
+import os
+from dataloader.data import Data_dfaust
 
 class Datainfo_base():
     def __init__(self):

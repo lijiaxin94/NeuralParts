@@ -11,5 +11,6 @@ dfaust_surface_samples_folder = 'surface_samples'
 dfaust_n_preprocessed_surface_samples = 100000
 dfaust_n_surface_samples = 2000
 dfaust_batch_size = 2
+dfaust_num_workers = 4
 
 

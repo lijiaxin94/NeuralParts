@@ -153,10 +153,9 @@ def save_images():
             if not exists(tdir):
                 mkdir(tdir)
             for mesh_file_name in os.listdir(mdir):
-                mesh = trimesh.load(mesh_file_path, process=False)
+                meshpath = join(mdir, mesh_file_name)
                 imagepath = join(tdir,mesh_file_name[:-4]+'.png')
-                print(imagepath)
-                renderable = render_dfaust(scene, renderable, mesh_file_name, imagepath)
+                renderable = render_dfaust(scene, renderable, meshpath, imagepath)
             print("saved images on ", tdir)
 
 
