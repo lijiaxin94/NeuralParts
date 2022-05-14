@@ -11,12 +11,12 @@ class Conditional_Coupling_Layer(nn.Module):
     #   inputpoint_nsplit : batch_size(4) X numpointsinsphere(200) X n_primitive(5) X dimension(2)
     #   inputpoint_split : batch_size(4) X numpointsinsphere(200) X n_primitive(5) X dimension(1)
 
-    def __init__(self, n_feature, n_primitive):
+    def __init__(self, n_feature, n_p_theta):
         super().__init__()
-        self.ptheta_layer1 = P_Theta_Layer()
-        self.ptheta_layer2 = P_Theta_Layer()
-        self.stheta_layer = S_Theta_Layer(n_feature+n_primitive)
-        self.ttheta_layer = T_Theta_Layer(n_feature+n_primitive)
+        self.ptheta_layer1 = P_Theta_Layer(output_size=n_p_theta)
+        self.ptheta_layer2 = P_Theta_Layer(output_size=n_p_theta)
+        self.stheta_layer = S_Theta_Layer(n_feature+n_p_theta)
+        self.ttheta_layer = T_Theta_Layer(n_feature+n_p_theta)
 
 
     
