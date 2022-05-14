@@ -26,6 +26,7 @@ class Datainfo_dfaust(Datainfo_base):
         # get all datainfo in computer
         datainfo_local = []
         for d in sorted(os.listdir(dfaust_dataset_directory)):
+            if '.hdf5' in d: continue
             for l in sorted(os.listdir(os.path.join(
                 dfaust_dataset_directory, d, dfaust_mesh_folder)))[20:]:
                 datainfo_local.append((d + ':' +l[:-4]))

@@ -1,9 +1,10 @@
 from torch.utils.data import DataLoader
+from ./dataloader/dataset import Dataset_surface_samples
 from config import *
 
 def build_dataloader(datatype, splits):
     if (datatype=='dfaust'):
-        dataset = Dataset_dfaust(splits)
+        dataset = Dataset_surface_samples(splits)
         batch_size = dfaust_batch_size
     else:
         print('no dataset named ' + datatype)
