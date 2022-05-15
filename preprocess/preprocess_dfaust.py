@@ -18,6 +18,7 @@ from simple_3dviz.utils import save_frame
 
 sys.path.insert(0, os.getcwd()) 
 from config import *
+from utils.mesh_containment_check import check_mesh_contains
 
 sids = ['50002', '50004', '50007', '50009', '50020',
         '50021', '50022', '50025', '50026', '50027']
@@ -48,7 +49,7 @@ def delete_folders(folder):
             tdir = join(tdir, folder)
             if not exists(tdir): continue
             shutil.rmtree(tdir)
-            print("delted ", tdir)
+            print("deleted ", tdir)
 
 def save_mesh():
     for i in range(len(sids)):
@@ -79,7 +80,7 @@ def save_mesh():
                 write_mesh_as_obj(fname, v, faces)
             print("saved on ", tdir)
 
-def save_surface_samples():
+def get_train_datainfo():
     datainfo_split = []
     with open(dfaust_split_file, "r") as f:
         data = np.array([row for row in csv.reader(f)])
@@ -87,7 +88,10 @@ def save_surface_samples():
         s_data = data[data[:,2]==s]
         for d, l in zip(s_data[:, 0], s_data[:, 1]):
             datainfo_split.append(d + ':' + l)
-    datainfo_split = set(datainfo_split)
+    return set(datainfo_split)
+
+def save_surface_samples():
+    datainfo_split = get_train_datainfo()
     for i in range(len(sids)):
         sid = sids[i]
         for seq in seqs:
@@ -129,7 +133,6 @@ def render_dfaust(scene, prev_renderable, seq, target):
     save_frame(target, scene.frame)
     return new_renderable
 
-
 def get_scene():
     scene = Scene((224, 224))
     scene.camera_position = (1, 1.5, 3)
@@ -158,6 +161,35 @@ def save_images():
                 renderable = render_dfaust(scene, renderable, meshpath, imagepath)
             print("saved images on ", tdir)
 
+def save_volume_samples():
+    datainfo_split = get_train_datainfo()
+    for i in range(len(sids)):
+        sid = sids[i]
+        for seq in seqs:
+            sidseq = sid + '_' + seq
+            tdir = join(dfaust_dataset_directory, sidseq)
+            if not exists(tdir): continue
+            mdir = join(tdir, dfaust_mesh_folder)
+            tdir = join(tdir, dfaust_volume_samples_folder)
+            if not exists(tdir):
+                mkdir(tdir)
+            for mesh_file_name in os.listdir(mdir):
+                targetpath = join(tdir,mesh_file_name[:-4]+'.npz')
+                if (sidseq + ':' + mesh_file_name[:-4]) not in datainfo_split:
+                    if os.path.exists(targetpath):
+                        os.remove(targetpath)
+                    continue
+                meshpath = join(mdir, mesh_file_name)
+                mesh = trimesh.load(meshpath, process=False)
+                points = np.random.rand(n_preprocessed_volume_samples, 
+                        3).astype(np.float32) - 0.5
+                labels = check_mesh_contains(mesh, points).astype(np.float32)[:, None]
+                np.savez(targetpath, points=points, occupancies=labels[:,0])
+            print("saved volume samples on ", tdir)
+
 
 if __name__ == '__main__':
+    save_mesh()
+    save_surface_samples()
     save_images()
+    save_volume_samples()
