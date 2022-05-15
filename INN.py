@@ -18,9 +18,13 @@ class Conditional_Coupling_Layer(nn.Module):
         self.stheta_layer = S_Theta_Layer(n_feature+n_p_theta)
         self.ttheta_layer = T_Theta_Layer(n_feature+n_p_theta)
 
-
+    def forward(self, Cm_ext, point_nsplit, point_split, inv):
+        if inv :
+            return self.backward_sub(Cm_ext, point_nsplit, point_split)
+        else :
+            return self.forward_sub(self, Cm_ext, point_nsplit, point_split)
     
-    def forward(self, Cm_ext, inputpoint_nsplit, inputpoint_split):
+    def forward_sub(self, Cm_ext, inputpoint_nsplit, inputpoint_split):
 
         x1 = self.ptheta_layer1(inputpoint_nsplit)
         x2 = self.ptheta_layer2(inputpoint_nsplit)
@@ -35,7 +39,7 @@ class Conditional_Coupling_Layer(nn.Module):
 
         return outputpoint_nsplit, outputpoint_split
 
-    def backward(self, Cm_ext, outputpoint_nsplit, outputpoint_split):
+    def backward_sub(self, Cm_ext, outputpoint_nsplit, outputpoint_split):
 
         x1 = self.ptheta_layer1(outputpoint_nsplit)
         x2 = self.ptheta_layer2(outputpoint_nsplit)

@@ -24,7 +24,7 @@ def fx_sample_sphere(Batch, num_points, M, d=3):
         for j in range(0, 2*m):
             L.append([math.sin(i * math.pi / m) * math.cos(j * math.pi / m), math.sin(i * math.pi / m) * math.sin(j * math.pi / m), math.cos(i * math.pi / m)])
     L = torch.tensor(L) # Tensor of size num_points X dim
-    s, t = L.size(0), L.size(1)
+    s, t = L.shape(0), L.shape(1)
     L = torch.expand(Batch, M, s, t)
     L = L.transpose(1, 2)
     return L
