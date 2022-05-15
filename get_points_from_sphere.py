@@ -1,5 +1,6 @@
 import torch
 import math
+import random
 from torch import nn
 
 # Sample n points in the sphere, randomly. ( For loss function )
@@ -15,18 +16,22 @@ def rd_sample_sphere(Batch, num_points, M, dim=3):
 
 # Get fixed >n points in the sphere ( For training )
 # Output : tensor of size Batch X (more than) num_points X M X dim
-def fx_sample_sphere(Batch, num_points, M, d=3):
+def fx_sample_sphere(Batch, num_points, M, d=3, randperm=True):
 
     m = int(num_points**0.5) + 2
-
-    L = [[0.0, 0.0, 1.0], [0.0, 0.0, -1.0]]
+    if randperm :
+        L = [random.shuffle([0.0, 0.0, 1.0]), random.shuffle([0.0, 0.0, -1.0])]
+    else :
+        L = [[0.0, 0.0, 1.0], [0.0, 0.0, -1.0]]
     for i in range(1, m):
         for j in range(0, 2*m):
-            L.append([math.sin(i * math.pi / m) * math.cos(j * math.pi / m), math.sin(i * math.pi / m) * math.sin(j * math.pi / m), math.cos(i * math.pi / m)])
+            pt = [math.sin(i * math.pi / m) * math.cos(j * math.pi / m), math.sin(i * math.pi / m) * math.sin(j * math.pi / m), math.cos(i * math.pi / m)]
+            if randperm :
+                L.append(random.shuffle(pt))
+            else:
+                L.append(pt)
     L = torch.tensor(L) # Tensor of size num_points X dim
-    s, t = L.shape(0), L.shape(1)
-    L = torch.expand(Batch, M, s, t)
-    L = L.transpose(1, 2)
+    L = L[None, :, None :].expand(Batch, -1, M, -1)
     return L
 
 
