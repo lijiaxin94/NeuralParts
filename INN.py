@@ -1,7 +1,30 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import random
 from torch.autograd import Variable
+
+class Invertible_Neural_Network(nn.Module):
+
+    def __init__(self, n_feature, n_p_theta, n_layer):
+        super().__init__()
+        self.n_feature = n_feature
+        self.n_p_theta = n_p_theta
+        self.n_layer = n_layer
+        self.split = [random.choice([0, 1, 2]) for i in range(n_layer)]
+        self.layers = [Conditional_Coupling_Layer(n_feature, n_p_theta, self.split[i]) for i in range(n_layer)]
+    
+    def forward(self, Cm_ext, x):
+        y = x
+        for i in range(self.n_layer):
+            y = (self.layers)[i](Cm_ext, y, 0)
+        return y
+    
+    def backward(self, Cm_ext, x):
+        y = x 
+        for i in range(self.n_layer):
+            y = (self.layers)[i](Cm_ext, y, 1)
+        return y
 
 class Conditional_Coupling_Layer(nn.Module):
     
@@ -11,14 +34,18 @@ class Conditional_Coupling_Layer(nn.Module):
     #   inputpoint_nsplit : batch_size(4) X numpointsinsphere(200) X n_primitive(5) X dimension(2)
     #   inputpoint_split : batch_size(4) X numpointsinsphere(200) X n_primitive(5) X dimension(1)
 
-    def __init__(self, n_feature, n_p_theta):
+    def __init__(self, n_feature, n_p_theta, split):
+        # split = 0 -> split x / split = 1 -> split y / split 2 -> split z
         super().__init__()
+        self.split = split
         self.ptheta_layer1 = P_Theta_Layer(output_size=n_p_theta)
         self.ptheta_layer2 = P_Theta_Layer(output_size=n_p_theta)
         self.stheta_layer = S_Theta_Layer(n_feature+n_p_theta)
         self.ttheta_layer = T_Theta_Layer(n_feature+n_p_theta)
 
-    def forward(self, Cm_ext, point_nsplit, point_split, inv):
+    def forward(self, Cm_ext, point, inv):
+        point_nsplit = ???
+        point_split = ???
         if inv :
             return self.backward_sub(Cm_ext, point_nsplit, point_split)
         else :
