@@ -7,6 +7,8 @@ from config import *
 
 # losses are reconstruction loss, occupancy loss, normal consistency loss, overlapping loss, and convergence loss
 
+#output is batch * 222 * 5 * 3
+
 def get_loss_function()
     functions = [loss_reconstruction, loss_occupancy, loss_normal_consistency,
                 loss_overlapping, loss_convergence]
