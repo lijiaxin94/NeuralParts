@@ -2,7 +2,7 @@ import torch
 
 def loss_reconstruction(prediction, target):
     
-    t_pts = target[1] # batch * N_t * 3
+    t_pts = target[1][:,:,:3] # batch * N_t * 3
     p_pts = prediction[0] # batch * n_prim * N_p * 3
 
     dist = p_pts[:,:,:,None] - t_pts[:, None, None] # batch * n_prim * N_p * N_t *3

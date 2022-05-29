@@ -4,9 +4,9 @@ from config import *
 def loss_overlapping(prediction, target):
     # target : occupancy pairs
     
-    t_pts = target[:,:,:3] # batch * N * 3
-    t_labels = target[:,:,3] # batch * N
-    t_w = target[:,:,4] # batch * N
+    t_pts = target[2][:,:,:3] # batch * N * 3
+    t_labels = target[2][:,:,3] # batch * N
+    t_w = target[2][:,:,4] # batch * N
 
     g_m = prediction[1] # batch * N * M
 
