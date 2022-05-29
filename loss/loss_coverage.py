@@ -3,12 +3,12 @@ import torch
 def loss_coverage(prediction, target):
     # target : occupancy pairs
 
-    t_pts = target[:,:,:3] # batch * N * 3
-    t_labels = target[:,:,3] # batch * N
-    t_w = target[:,:,4] # batch * N
+    t_pts = target[2][:,:,:3] # batch * N * 3
+    t_labels = target[2][:,:,3] # batch * N
+    t_w = target[2][:,:,4] # batch * N
     
     g_m = prediction[1] # batch * N * M
-    
+
     M = g_m.shape(2)
     t_labels_ext = torch.unsqueeze(dim=2).expand(-1, -1, M)
     

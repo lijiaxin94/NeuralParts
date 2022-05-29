@@ -5,6 +5,11 @@ import feature_extractor as FE
 import INN as INN_mod
 import get_points_from_sphere as gs
 import random
+from config import *
+
+def Model(s)
+    if (s == 'dfaust'):
+        return Model_overall()
 
 class Model_overall(nn.Module):
     def __init__(self, n_feature, n_primitive, n_points, n_p_theta, n_layer):
@@ -33,12 +38,16 @@ class Model_overall(nn.Module):
 
         points_primitives = self.INN(Cm_ext, inputpoint)
 
-        g_m = self.INN.backward(Cm_ext, volume_samples[:,:,:3])
-        g_m = g_m.pow(2).sum(3).pow(0.5).sub(1)
+        y_volume = self.INN.backward(Cm_ext, volume_samples[:,:,:3])
+        g_m_volume = y_volume.pow(2).sum(3).pow(0.5).sub(1)
 
-        gradient_G = self.INN.backward(Cm_ext, surface_samples[:,:,:3])
+        y_surface = self.INN.backward(Cm_ext, surface_samples[:,:,:3])
+        g_m_surface = y_surface.pow(2).sum(3).pow(0.5).sub(1)
+        G_surface = y_surface.min(-1)[0]
 
-        return [points_primitives, g_m, gradient_G]
+        gradient_G_surface = torch.autograd.grad(G_surface.sum(), surface_samples[:,:,:3])[0]
+
+        return [points_primitives, g_m_volume, gradient_G_surface]
     
     def backward(self, Cm_ext, outputpoint):
         # Cm_ext : tensor of size batch_size X n_points X n_primitive X n_feature

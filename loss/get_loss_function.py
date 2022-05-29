@@ -12,10 +12,10 @@ from config import *
 def get_loss_function()
     functions = [loss_reconstruction, loss_occupancy, loss_normal_consistency,
                 loss_overlapping, loss_convergence]
-    def loss_function(output, target):
+    def loss_function(prediction, target):
         losses = []
         for w, f in zip(loss_weight, functions):
-            losses.append(w * f(output, target))
+            losses.append(w * f(prediction, target))
         return sum(losses)
 
     return loss_function
