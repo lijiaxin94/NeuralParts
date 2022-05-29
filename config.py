@@ -3,10 +3,10 @@ n_surface_samples = 2000
 n_preprocessed_volume_samples = 100000
 n_volume_samples = 5000
 loss_weight = [1.0,0.1,0.01,0.1,0.01]
-occupancy_loss_temperature = 4e-3
+temperature = 4e-3
+max_shared_pts = 1.95
 
 dfaust_dataset_directory = '/data/D-FAUST'
-dfaust_split_ratio = {'train': 0.7, 'test':0.2, 'val': 0.1}
 dfaust_split_file = '/data/dfaust_split.csv'
 dfaust_mesh_folder = 'mesh'
 dfaust_image_folder = 'image'
