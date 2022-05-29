@@ -20,20 +20,25 @@ class Model_overall(nn.Module):
 
     def forward(self, x):
 
-        Cm = self.fe(x)
-        print("Size of Cm is : " + str(Cm.shape))
+        image = x[0]
+        surface_samples = x[1]
+        volume_samples = x[2]
 
+        Cm = self.fe(image)
         Batch = Cm.shape[0]
-
         inputpoint = gs.fx_sample_sphere(Batch, self.n_points, self.n_primitive, randperm=False)
-        print("Size of inputpoint is : " + str(inputpoint.shape))
-
-        # Cm : tensor of size batch_size X n_primitive X n_feature
         Cm_ext = (torch.unsqueeze(Cm, dim=1)).expand(-1, inputpoint.shape[1], -1, -1)
-        print("Size of Cm_ext is : " + str(Cm_ext.shape))
         # Cm_ext : tensor of size batch_size X n_points X n_primitive X n_feature
 
-        return self.INN(Cm_ext, inputpoint)
+
+        points_primitives = self.INN(Cm_ext, inputpoint)
+
+        g_m = self.INN.backward(Cm_ext, volume_samples[:,:,:3])
+        g_m = g_m.pow(2).sum(3).pow(0.5).sub(1)
+
+        gradient_G = self.INN.backward(Cm_ext, surface_samples[:,:,:3])
+
+        return [points_primitives, g_m, gradient_G]
     
     def backward(self, Cm_ext, outputpoint):
         # Cm_ext : tensor of size batch_size X n_points X n_primitive X n_feature

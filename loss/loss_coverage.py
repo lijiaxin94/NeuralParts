@@ -1,17 +1,19 @@
 import torch
 
-def loss_convergence(target):
+def loss_coverage(prediction, target):
     # target : occupancy pairs
 
-    t_pts = [] # batch * N * 3
-    t_labels = [] # batch * N
+    t_pts = target[:,:,:3] # batch * N * 3
+    t_labels = target[:,:,3] # batch * N
+    t_w = target[:,:,4] # batch * N
     
-    m_values = [] # batch * N * M
-    M = m_values.shape(2)
+    g_m = prediction[1] # batch * N * M
+    
+    M = g_m.shape(2)
     t_labels_ext = torch.unsqueeze(dim=2).expand(-1, -1, M)
     
-    Max = torch.abs(torch.max(m_values))
-    t_labels_ext = (-2) * Max * t_labels_ext + m_values
+    Max = torch.abs(torch.max(g_m))
+    t_labels_ext = (-2) * Max * t_labels_ext + g_m
 
     k = 10
     # for each primitive, we need to choose k points

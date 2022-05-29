@@ -1,19 +1,18 @@
 import torch
+from config import *
 
 def loss_overlapping(prediction, target):
     # target : occupancy pairs
     
-    t_pts = [] # batch * N * 3
-    t_labels = [] # batch * N
+    t_pts = target[:,:,:3] # batch * N * 3
+    t_labels = target[:,:,3] # batch * N
+    t_w = target[:,:,4] # batch * N
 
-    m_values = [] # batch * N * M
+    g_m = prediction[1] # batch * N * M
 
-    lambda_v = 1.95
-    sharpness = 10.0
-
-    sum_values = torch.sum(torch.sigmoid((-1) * m_values / sharpness), -1)
+    sum_values = torch.sum(torch.sigmoid((-1) * g_m / temperature), -1)
     # sum_values : batch * N
-    loss_value = torch.maximum(torch.sub(sum_values, lambda_v),  torch.zeros(sum_values.shape))
+    loss_value = torch.maximum(torch.sub(sum_values, max_shared_pts),  torch.zeros(sum_values.shape))
 
     return loss_value.mean()
 
