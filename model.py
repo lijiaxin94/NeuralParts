@@ -8,8 +8,7 @@ import random
 from config import *
 
 def Model(s)
-    if (s == 'dfaust'):
-        return Model_overall()
+    return Model_overall(512,n_primitive, 200, 128, 4)
 
 class Model_overall(nn.Module):
     def __init__(self, n_feature, n_primitive, n_points, n_p_theta, n_layer):
@@ -44,10 +43,22 @@ class Model_overall(nn.Module):
         y_surface = self.INN.backward(Cm_ext, surface_samples[:,:,:3])
         g_m_surface = y_surface.pow(2).sum(3).pow(0.5).sub(1)
         G_surface = y_surface.min(-1)[0]
-
         gradient_G_surface = torch.autograd.grad(G_surface.sum(), surface_samples[:,:,:3])[0]
 
         return [points_primitives, g_m_volume, gradient_G_surface]
+
+    def eval(self, x):
+        image = x[0]
+        surface_samples = x[1]
+        volume_samples = x[2]
+
+        Cm = self.fe(image)
+        Batch = Cm.shape[0]
+        inputpoint = gs.fx_sample_sphere(Batch, self.n_points, self.n_primitive, randperm=False)
+        Cm_ext = (torch.unsqueeze(Cm, dim=1)).expand(-1, inputpoint.shape[1], -1, -1)
+
+        
+
     
     def backward(self, Cm_ext, outputpoint):
         # Cm_ext : tensor of size batch_size X n_points X n_primitive X n_feature

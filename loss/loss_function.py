@@ -9,13 +9,11 @@ from config import *
 
 #output is batch * 222 * 5 * 3
 
-def get_loss_function()
+def loss_function(prediction, target)
     functions = [loss_reconstruction, loss_occupancy, loss_normal_consistency,
                 loss_overlapping, loss_convergence]
-    def loss_function(prediction, target):
-        losses = []
-        for w, f in zip(loss_weight, functions):
-            losses.append(w * f(prediction, target))
-        return sum(losses)
+    losses = []
+    for w, f in zip(loss_weight, functions):
+        losses.append(w * f(prediction, target))
+    return sum(losses)
 
-    return loss_function
