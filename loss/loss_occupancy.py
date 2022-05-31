@@ -10,10 +10,7 @@ def loss_occupancy(prediction, target, sum_loss):
     g_m = prediction[1] # batch * N * N_p
 
     G = g_m.min(-1)[0] # batch * N
-    p_classification = torch.sigmoid(-G / temperature)
-    BCELoss = torch.nn.BCELoss(reduction="none")
-    loss = BCELoss(p_classification, t_w)
-    loss = t_w * loss
-    loss = loss.mean()
-    sum_loss[1] += loss.item()
+    p_classification = -1 * G / temperature
+    BCELoss = torch.nn.BCEWithLogitsLoss(weight = t_w, reduction="mean")
+    loss = BCELoss(p_classification, t_labels)
     return loss
