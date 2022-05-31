@@ -25,7 +25,7 @@ class Invertible_Neural_Network(nn.Module):
     def backward(self, Cm, x):
         y = x 
         for i in range(self.n_layer):
-            y = (self.layers)[i](Cm, y, 1)
+            y = (self.layers)[self.n_layer -1 -i](Cm, y, 1)
         return y
 
 class Conditional_Coupling_Layer(nn.Module):
