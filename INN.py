@@ -88,7 +88,7 @@ class Conditional_Coupling_Layer(nn.Module):
         # s&t : batch_size(4) X numpointsinsphere(200) X n_primitive(5) X 1
         # return val : batch_size(4) X numpointsinsphere(200) X n_primitive(5) X 3
         outputpoint_nsplit = inputpoint_nsplit
-        outputpoint_split = t + (inputpoint_nsplit * torch.exp(s))
+        outputpoint_split = t + (inputpoint_split * torch.exp(s))
 
         return outputpoint_nsplit, outputpoint_split
 
