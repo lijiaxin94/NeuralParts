@@ -17,7 +17,7 @@ def main():
 
     for epoch in range(n_epoch):
         aggregate = 0
-        loss = torch.FloatTensor(0).to(device)
+        loss = torch.tensor(0.0).to(device)
         sum_loss = [0.,0.,0.,0.,0.]
         sum_metric = [0.,0.]
         for b, target in zip(list(range(n_step_per_epoch)), train_dataloader.infinite_iterator()):
@@ -27,28 +27,29 @@ def main():
             prediction = model(target)
             loss = loss + loss_fn(prediction, target, sum_loss)
             metric_fn(prediction, target, sum_metric)
-            sys.stdout.write("epoch %d, batch: %d, losses: %.5f, %.5f, %.5f, %.5f, %.5f, iou: %.5f, chamferL1: %.5f \r" % (epoch, b, sum_loss[0]/(b+1), sum_loss[1]/(b+1), sum_loss[2]/(b+1), sum_loss[3]/(b+1), sum_loss[4]/(b+1), sum_metric[0]/(b+1), sum_metric[1]/(b+1)))
+            print("epoch %d, batch: %d, losses: %.5f, %.5f, %.5f, %.5f, %.5f, iou: %.5f, chamferL1: %.5f" % (epoch+1, b+1, sum_loss[0]/(b+1), sum_loss[1]/(b+1), sum_loss[2]/(b+1), sum_loss[3]/(b+1), sum_loss[4]/(b+1), sum_metric[0]/(b+1), sum_metric[1]/(b+1)))
+            #sys.stdout.write("epoch %d, batch: %d, losses: %.5f, %.5f, %.5f, %.5f, %.5f, iou: %.5f, chamferL1: %.5f \r" % (epoch+1, b+1, sum_loss[0]/(b+1), sum_loss[1]/(b+1), sum_loss[2]/(b+1), sum_loss[3]/(b+1), sum_loss[4]/(b+1), sum_metric[0]/(b+1), sum_metric[1]/(b+1)))
             if (aggregate == n_aggregate):
                 optimizer.zero_grad()
-                loss.sum().backward()
+                loss.backward()
                 optimizer.step()
                 aggregate = 0
-                loss = torch.FloatTensor(0).to(device)
-        print("epoch %d, batch: %d, losses: %.5f, %.5f, %.5f, %.5f, %.5f, iou: %.5f, chamferL1: %.5f \r" % (epoch+1, b+1, sum_loss[0]/b, sum_loss[1]/b, sum_loss[2]/b, sum_loss[3]/b, sum_loss[4]/b, sum_metric[0]/b, sum_metric[1]/b))
+                loss = torch.tensor(0.0).to(device)
+        print("epoch %d, batch: %d, losses: %.5f, %.5f, %.5f, %.5f, %.5f, iou: %.5f, chamferL1: %.5f \r" % (epoch+1, b+1, sum_loss[0]/(b+1), sum_loss[1]/(b+1), sum_loss[2]/(b+1), sum_loss[3]/(b+1), sum_loss[4]/(b+1), sum_metric[0]/(b+1), sum_metric[1]/(b+1)))
         if (epoch+1) % 10 == 0:
-            printf("--------------validation--------------")
+            print("--------------validation--------------")
             sum_loss = [0.,0.,0.,0.,0.]
             sum_metric = [0.,0.]
-            with torch.no_grad():
-                for b, target in zip(list(range(len(val_dataloader))), val_dataloader):
-                    for i in range(len(sample)):
-                        target[i] = target[i].to(device)
-                    prediction = model(target)
-                    loss_fn(prediction, target, sum_loss)
-                    metric_fn(prediction, target, sum_loss)
-                    sys.stdout.write("epoch %d, batch: %d, losses: %.5f, %.5f, %.5f, %.5f, %.5f, iou: %.5f, chamferL1: %.5f \r" % (epoch, b, sum_loss[0]/b, sum_loss[1]/b, sum_loss[2]/b, sum_loss[3]/b, sum_loss[4]/b, sum_metric[0]/b, sum_metric[1]/b))
-            print("epoch %d, batch: %d, losses: %.5f, %.5f, %.5f, %.5f, %.5f, iou: %.5f, chamferL1: %.5f \r" % (epoch, b, sum_loss[0]/b, sum_loss[1]/b, sum_loss[2]/b, sum_loss[3]/b, sum_loss[4]/b, sum_metric[0]/b, sum_metric[1]/b))
-            printf("--------------------------------------")
+            
+            for b, target in zip(list(range(len(val_dataloader))), val_dataloader):
+                for i in range(len(target)):
+                    target[i] = target[i].to(device)
+                prediction = model(target)
+                loss_fn(prediction, target, sum_loss)
+                metric_fn(prediction, target, sum_metric)
+                sys.stdout.write("epoch %d, batch: %d, losses: %.5f, %.5f, %.5f, %.5f, %.5f, iou: %.5f, chamferL1: %.5f \r" % (epoch+1, b+1, sum_loss[0]/(b+1), sum_loss[1]/(b+1), sum_loss[2]/(b+1), sum_loss[3]/(b+1), sum_loss[4]/(b+1), sum_metric[0]/(b+1), sum_metric[1]/(b+1)))
+            print("epoch %d, batch: %d, losses: %.5f, %.5f, %.5f, %.5f, %.5f, iou: %.5f, chamferL1: %.5f \r" % (epoch+1, b+1, sum_loss[0]/(b+1), sum_loss[1]/(b+1), sum_loss[2]/(b+1), sum_loss[3]/(b+1), sum_loss[4]/(b+1), sum_metric[0]/(b+1), sum_metric[1]/(b+1)))
+            print("--------------------------------------")
 
 
 if __name__=='__main__':

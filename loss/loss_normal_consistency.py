@@ -7,10 +7,10 @@ def loss_normal_consistency(prediction, target, sum_loss):
 
     gradient_of_G = prediction[2] # batch * N_t * 3, depends on t_pts
 
-    gradient_of_G_norm = torch.sqrt(torch.square(gradient_of_G).sum(-1))
+    gradient_of_G_norm = gradient_of_G.pow(2).sum(-1).pow(0.5)
     prod = gradient_of_G * t_normals
     prod_sum = prod.sum(-1)
-    loss =  (1 - (prod_sum/gradient_of_G_norm).mean())
+    loss = 1 - (prod_sum/gradient_of_G_norm).mean()
     sum_loss[2] += loss.item()
     return loss
 
