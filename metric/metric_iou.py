@@ -1,7 +1,7 @@
 from config import *
 import torch
 
-def metric_iou(prediction, target):
+def metric_iou(prediction, target, sum_metric):
     
     t_pts = target[2][:,:,:3] # batch * N * 3
     t_labels = target[2][:,:,3] > 0.5 # batch * N
@@ -14,4 +14,5 @@ def metric_iou(prediction, target):
     union = (t_labels | p_labels).type(torch.FloatTensor) * t_w
     intersect = (t_labels & p_labels).type(torch.FloatTensor) * t_w
 
-    return (intersect.sum(-1) / union.sum(-1)).mean()
+    iou = (intersect.sum(-1) / union.sum(-1)).mean()
+    sum_metric[0] += iou.item()

@@ -8,7 +8,7 @@ class FeatureExtractor(torch.nn.Module):
         # feature encoder
         super().__init__()
         self.n_feature = n_feature
-        print("n_feature is " + str(n_feature))
+        #print("n_feature is " + str(n_feature))
         self.n_primitive = n_primitive
         self.fe = models.resnet18(pretrained=True)
         self.fc1 = torch.nn.Linear(512, 512)

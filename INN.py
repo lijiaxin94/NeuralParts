@@ -6,25 +6,26 @@ from torch.autograd import Variable
 
 class Invertible_Neural_Network(nn.Module):
 
-    def __init__(self, n_feature, n_p_theta, n_layer):
+    def __init__(self, n_feature, n_p_theta, n_layer, device):
         super().__init__()
         self.n_feature = n_feature
         self.n_p_theta = n_p_theta
         self.n_layer = n_layer
         self.split = [random.choice([0, 1, 2]) for i in range(n_layer)]
-        self.layers = [Conditional_Coupling_Layer(n_feature, n_p_theta, self.split[i]) for i in range(n_layer)]
+        self.device = device
+        self.layers = [Conditional_Coupling_Layer(n_feature, n_p_theta, self.split[i], self.device) for i in range(n_layer)]
     
-    def forward(self, Cm_ext, x):
+    def forward(self, Cm, x):
         y = x
         for i in range(self.n_layer):
-            print("forwarding. " + str(i) + " / " + str(self.n_layer) + " layers, split is " + str(self.split[i]))
-            y = (self.layers)[i](Cm_ext, y, 0)
+            #print("forwarding. " + str(i) + " / " + str(self.n_layer) + " layers, split is " + str(self.split[i]))
+            y = (self.layers)[i](Cm, y, 0)
         return y
     
-    def backward(self, Cm_ext, x):
+    def backward(self, Cm, x):
         y = x 
         for i in range(self.n_layer):
-            y = (self.layers)[i](Cm_ext, y, 1)
+            y = (self.layers)[i](Cm, y, 1)
         return y
 
 class Conditional_Coupling_Layer(nn.Module):
@@ -36,11 +37,11 @@ class Conditional_Coupling_Layer(nn.Module):
     #   inputpoint_nsplit : batch_size(4) X numpointsinsphere(200) X n_primitive(5) X dimension(2)
     #   inputpoint_split : batch_size(4) X numpointsinsphere(200) X n_primitive(5) X dimension(1)
 
-    def __init__(self, n_feature, n_p_theta, split):
+    def __init__(self, n_feature, n_p_theta, split, device):
         # split = 0 -> split x / split = 1 -> split y / split 2 -> split z
         super().__init__()
         self.split = split
-        print("split is : " + str(split))
+        #print("split is : " + str(split))
         if (split == 0):
             self.nsplit = [1, 2]
         elif (split == 1):
@@ -53,31 +54,37 @@ class Conditional_Coupling_Layer(nn.Module):
         self.ptheta_layer2 = P_Theta_Layer(output_size=n_p_theta)
         self.stheta_layer = S_Theta_Layer(n_feature+n_p_theta)
         self.ttheta_layer = T_Theta_Layer(n_feature+n_p_theta)
+        self.device = device
+        self.ptheta_layer1.to(self.device)
+        self.ptheta_layer2.to(self.device)
+        self.stheta_layer.to(self.device)
+        self.ttheta_layer.to(self.device)
 
-    def forward(self, Cm_ext, point, inv):
-        point_nsplit = torch.index_select(point, 3, torch.tensor(self.nsplit))
-        point_split = torch.index_select(point, 3, torch.tensor([self.split]))
+    def forward(self, Cm, point, inv):
+        #print("shape of point ",point.shape)
+        point_nsplit = torch.index_select(point, 3, torch.tensor(self.nsplit).to(self.device))
+        point_split = torch.index_select(point, 3, torch.tensor([self.split]).to(self.device))
         if inv :
-            newpoint_nsplit, newpoint_split = self.backward_sub(Cm_ext, point_nsplit, point_split)
+            newpoint_nsplit, newpoint_split = self.backward_sub(Cm, point_nsplit, point_split)
         else :
-            newpoint_nsplit, newpoint_split = self.forward_sub(Cm_ext, point_nsplit, point_split)
+            newpoint_nsplit, newpoint_split = self.forward_sub(Cm, point_nsplit, point_split)
         
         if (self.split == 0):
             return torch.cat((newpoint_split, newpoint_nsplit), dim = -1)
         if (self.split == 1):
-            return torch.cat((torch.index_select(newpoint_nsplit, 3, torch.tensor([0])), newpoint_nsplit, torch.index_select(newpoint_nsplit, 3, torch.tensor([1]))), dim = -1)
+            return torch.cat((torch.index_select(newpoint_nsplit, 3, torch.tensor([0]).to(self.device)), newpoint_split, torch.index_select(newpoint_nsplit, 3, torch.tensor([1]).to(self.device))), dim = -1)
         if (self.split == 2):
             return torch.cat((newpoint_nsplit, newpoint_split), dim = -1)
     
-    def forward_sub(self, Cm_ext, inputpoint_nsplit, inputpoint_split):
-
+    def forward_sub(self, Cm, inputpoint_nsplit, inputpoint_split):
+        #print(inputpoint_nsplit.device, inputpoint_split.device)
         x1 = self.ptheta_layer1(inputpoint_nsplit)
-        print("Size of x1 is : " + str(x1.shape))
+        #print("Size of x1 is : " + str(x1.shape))
         x2 = self.ptheta_layer2(inputpoint_nsplit)
         # x1&x2 : batch_size(4) X numpointsinsphere(200) X n_primitive(5) X dimension(128)
         # Cm_ext : batch_size(4) X numpointsinsphere(200) X n_primitive(5) X size_Cm(512)
-        s = self.stheta_layer(Cm_ext, x1)
-        t = self.ttheta_layer(Cm_ext, x2)
+        s = self.stheta_layer(Cm, x1)
+        t = self.ttheta_layer(Cm, x2)
         # s&t : batch_size(4) X numpointsinsphere(200) X n_primitive(5) X 1
         # return val : batch_size(4) X numpointsinsphere(200) X n_primitive(5) X 3
         outputpoint_nsplit = inputpoint_nsplit
@@ -85,14 +92,14 @@ class Conditional_Coupling_Layer(nn.Module):
 
         return outputpoint_nsplit, outputpoint_split
 
-    def backward_sub(self, Cm_ext, outputpoint_nsplit, outputpoint_split):
+    def backward_sub(self, Cm, outputpoint_nsplit, outputpoint_split):
 
         x1 = self.ptheta_layer1(outputpoint_nsplit)
         x2 = self.ptheta_layer2(outputpoint_nsplit)
         # x1&x2 : batch_size(4) X numpointsinsphere(200) X n_primitive(5) X dimension(128)
         # Cm_ext : batch_size(4) X numpointsinsphere(200) X n_primitive(5) X size_Cm(512)
-        s = self.ttheta_layer(Cm_ext, x1)
-        t = self.ttheta_layer(Cm_ext, x2)
+        s = self.ttheta_layer(Cm, x1)
+        t = self.ttheta_layer(Cm, x2)
         # s&t : batch_size(4) X numpointsinsphere(200) X n_primitive(5) X 1
         # return val : batch_size(4) X numpointsinsphere(200) X n_primitive(5) X 3
         inputpoint_nsplit = outputpoint_nsplit
@@ -126,14 +133,14 @@ class S_Theta_Layer(nn.Module):
         self.layer3 = nn.Sequential(nn.Linear(hidden2, hidden3), nn.Hardtanh(min_val = -10, max_val = 10))
         self.input_dim = input_dim
     
-    def forward(self, Cm_ext, ptheta_result):
-
+    def forward(self, Cm, ptheta_result):
+        Cm_ext = (torch.unsqueeze(Cm, dim=1)).expand(-1, ptheta_result.shape[1], -1, -1)
         x = torch.cat((Cm_ext, ptheta_result), dim=-1)
-        print("Size of x is " + str(x.shape) + " , input_dim is " + str(self.input_dim))
+        #print("Size of x is " + str(x.shape) + " , input_dim is " + str(self.input_dim))
         x = self.layer1(x)
         x = self.layer2(x)
         x = self.layer3(x)
-        print("Size of final x is " + str(x.shape))
+        #print("Size of final x is " + str(x.shape))
 
         return x
 
@@ -146,8 +153,8 @@ class T_Theta_Layer(nn.Module):
         self.layer2 = nn.Sequential(nn.Linear(hidden1, hidden2), nn.ReLU())
         self.layer3 = nn.Linear(hidden2, hidden3)
     
-    def forward(self, Cm_ext, ptheta_result):
-
+    def forward(self, Cm, ptheta_result):
+        Cm_ext = (torch.unsqueeze(Cm, dim=1)).expand(-1, ptheta_result.shape[1], -1, -1)
         x = torch.cat((Cm_ext, ptheta_result), dim=-1)
         x = self.layer1(x)
         x = self.layer2(x)

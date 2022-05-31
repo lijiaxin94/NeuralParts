@@ -1,18 +1,23 @@
 import torch
 
-def loss_reconstruction(prediction, target):
+def loss_reconstruction(prediction, target, sum_loss):
     
     t_pts = target[1][:,:,:3] # batch * N_t * 3
-    p_pts = prediction[0] # batch * n_prim * N_p * 3
+    p_pts = prediction[0] # batch * N_p * M * 3
 
-    dist = p_pts[:,:,:,None] - t_pts[:, None, None] # batch * n_prim * N_p * N_t *3
-    dist = dist.pow(2).sum(-1) # batch * n_prim * N_p * N_t
+    _, N_t, _ = t_pts.shape
+    _, N_p, M, _ = p_pts.shape
+    print(t_pts.unsqueeze(1).unsqueeze(3).expand(-1,N_p,-1,M,-1).shape, p_pts.unsqueeze(2).expand(-1,-1,N_t,-1,-1).shape)
+    dist =  t_pts.unsqueeze(1).unsqueeze(3).expand(-1,N_p,-1,M,-1) - p_pts.unsqueeze(2).expand(-1,-1,N_t,-1,-1)
+    # batch * N_p * N_t * M * 3
+    dist = dist.pow(2).sum(-1) # batch * M * N_p * N_t
+    min_dist = dist.min(3)[0].min(1)[0] + dist.min(2)[0] # batch
+    loss = min_dist.mean()
+    sum_loss[0] += loss.item()
+    return loss
 
-    min_dist = dist.min(1)[0].min(1)[0] + dist.min(3)[0] # batch
 
-    return min_dist.mean()
-
-
+    # batch * M * N_p * N_t *3
 
 
 
