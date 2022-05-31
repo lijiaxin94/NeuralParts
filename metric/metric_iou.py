@@ -11,8 +11,8 @@ def metric_iou(prediction, target, sum_metric):
 
     G = g_m.min(-1)[0] # batch * N
     p_labels = G <= 0
-    union = (t_labels | p_labels).type(torch.FloatTensor) * t_w
-    intersect = (t_labels & p_labels).type(torch.FloatTensor) * t_w
+    union = (t_labels | p_labels).float() * t_w
+    intersect = (t_labels & p_labels).float() * t_w
 
     iou = (intersect.sum(-1) / union.sum(-1)).mean()
     sum_metric[0] += iou.item()

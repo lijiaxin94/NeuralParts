@@ -11,7 +11,7 @@ def loss_normal_consistency(prediction, target, sum_loss):
     prod = gradient_of_G * t_normals
     prod_sum = prod.sum(-1)
     loss =  (1 - (prod_sum/gradient_of_G_norm).mean())
-    loss[2] += loss.item()
+    sum_loss[2] += loss.item()
     return loss
 
 

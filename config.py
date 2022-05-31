@@ -5,6 +5,7 @@ n_volume_samples = 5000
 loss_weight = [1.0,0.1,0.01,0.1,0.01]
 temperature = 4e-3
 max_shared_pts = 1.95
+n_points_coverage = 10
 learning_rate = 0.0001
 n_epoch = 400
 n_step_per_epoch = 500
