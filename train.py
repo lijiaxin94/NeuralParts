@@ -3,7 +3,7 @@ from dataloader.dataloader import build_dataloader
 from model import Model
 from loss.loss_function import loss_function
 from metric.metric_function import metric_function
-import os
+import os, sys
 from config import *
 
 def main():
@@ -17,7 +17,7 @@ def main():
 
     for epoch in range(n_epoch):
         aggregate = 0
-        loss = torch.FloatTensor(0)
+        loss = torch.FloatTensor(0).to(device)
         sum_loss = [0.,0.,0.,0.,0.]
         sum_metric = [0.,0.]
         for b, target in zip(list(range(n_step_per_epoch)), train_dataloader.infinite_iterator()):
@@ -27,15 +27,15 @@ def main():
             prediction = model(target)
             loss = loss + loss_fn(prediction, target, sum_loss)
             metric_fn(prediction, target, sum_metric)
-            sys.stdout.write("epoch %d, batch: %d, losses: %.5f, %.5f, %.5f, %.5f, %.5f, iou: %.5f, chamferL1: %.5f \r" % (epoch, b, sum_loss[0]/b, sum_loss[1]/b, sum_loss[2]/b, sum_loss[3]/b, sum_loss[4]/b, sum_metric[0]/b, sum_metric[1]/b))
+            sys.stdout.write("epoch %d, batch: %d, losses: %.5f, %.5f, %.5f, %.5f, %.5f, iou: %.5f, chamferL1: %.5f \r" % (epoch, b, sum_loss[0]/(b+1), sum_loss[1]/(b+1), sum_loss[2]/(b+1), sum_loss[3]/(b+1), sum_loss[4]/(b+1), sum_metric[0]/(b+1), sum_metric[1]/(b+1)))
             if (aggregate == n_aggregate):
                 optimizer.zero_grad()
-                loss.backward()
+                loss.sum().backward()
                 optimizer.step()
                 aggregate = 0
-                loss = torch.FloatTensor(0)
-        print("epoch %d, batch: %d, losses: %.5f, %.5f, %.5f, %.5f, %.5f, iou: %.5f, chamferL1: %.5f \r" % (epoch, b, sum_loss[0]/b, sum_loss[1]/b, sum_loss[2]/b, sum_loss[3]/b, sum_loss[4]/b, sum_metric[0]/b, sum_metric[1]/b))
-        if epoch != 0 and epoch % 10 == 0:
+                loss = torch.FloatTensor(0).to(device)
+        print("epoch %d, batch: %d, losses: %.5f, %.5f, %.5f, %.5f, %.5f, iou: %.5f, chamferL1: %.5f \r" % (epoch+1, b+1, sum_loss[0]/b, sum_loss[1]/b, sum_loss[2]/b, sum_loss[3]/b, sum_loss[4]/b, sum_metric[0]/b, sum_metric[1]/b))
+        if (epoch+1) % 10 == 0:
             printf("--------------validation--------------")
             sum_loss = [0.,0.,0.,0.,0.]
             sum_metric = [0.,0.]
