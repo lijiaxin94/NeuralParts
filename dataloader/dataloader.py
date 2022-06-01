@@ -11,7 +11,6 @@ from config import *
 def build_dataloader(datatype, splits):
     if (datatype=='dfaust'):
         datainfo = Datainfo_dfaust(splits)
-        batch_size = dfaust_batch_size
     else:
         print('no dataset named ' + datatype)
         exit(0)
