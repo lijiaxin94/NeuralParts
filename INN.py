@@ -90,10 +90,9 @@ class Conditional_Coupling_Layer(nn.Module):
         outputpoint_nsplit = inputpoint_nsplit
         outputpoint_split = t + (inputpoint_split * torch.exp(s))
 
-        return outputpoint_nsplit, outputpoint_split
+        return outputpoint_nsplit, outputpoint_split 
 
     def backward_sub(self, Cm, outputpoint_nsplit, outputpoint_split):
-
         x1 = self.ptheta_layer1(outputpoint_nsplit)
         x2 = self.ptheta_layer1(outputpoint_nsplit)
         # x1&x2 : batch_size(4) X numpointsinsphere(200) X n_primitive(5) X dimension(128)
