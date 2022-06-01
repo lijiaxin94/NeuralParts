@@ -12,7 +12,8 @@ def loss_overlapping(prediction, target, sum_loss):
 
     sum_values = torch.sum(torch.sigmoid((-1) * g_m / temperature), -1)
     # sum_values : batch * N
-    loss = torch.sub(sum_values, max_shared_pts).relu().mean()
+    relu = torch.nn.ReLU()
+    loss = relu(torch.sub(sum_values, max_shared_pts)).mean()
     sum_loss[3] += loss.item()
     return loss
 
