@@ -6,7 +6,7 @@ from torchvision import models
 class FeatureExtractor(torch.nn.Module):
     def __init__(self, n_feature, n_primitive):
         # feature encoder
-        super().__init__()
+        super().__init__() 
         self.n_feature = n_feature
         #print("n_feature is " + str(n_feature))
         self.n_primitive = n_primitive
