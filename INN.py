@@ -80,7 +80,7 @@ class Conditional_Coupling_Layer(nn.Module):
         #print(inputpoint_nsplit.device, inputpoint_split.device)
         x1 = self.ptheta_layer1(inputpoint_nsplit)
         #print("Size of x1 is : " + str(x1.shape))
-        x2 = self.ptheta_layer2(inputpoint_nsplit)
+        x2 = self.ptheta_layer1(inputpoint_nsplit)
         # x1&x2 : batch_size(4) X numpointsinsphere(200) X n_primitive(5) X dimension(128)
         # Cm_ext : batch_size(4) X numpointsinsphere(200) X n_primitive(5) X size_Cm(512)
         s = self.stheta_layer(Cm, x1)
@@ -95,10 +95,10 @@ class Conditional_Coupling_Layer(nn.Module):
     def backward_sub(self, Cm, outputpoint_nsplit, outputpoint_split):
 
         x1 = self.ptheta_layer1(outputpoint_nsplit)
-        x2 = self.ptheta_layer2(outputpoint_nsplit)
+        x2 = self.ptheta_layer1(outputpoint_nsplit)
         # x1&x2 : batch_size(4) X numpointsinsphere(200) X n_primitive(5) X dimension(128)
         # Cm_ext : batch_size(4) X numpointsinsphere(200) X n_primitive(5) X size_Cm(512)
-        s = self.ttheta_layer(Cm, x1)
+        s = self.stheta_layer(Cm, x1)
         t = self.ttheta_layer(Cm, x2)
         # s&t : batch_size(4) X numpointsinsphere(200) X n_primitive(5) X 1
         # return val : batch_size(4) X numpointsinsphere(200) X n_primitive(5) X 3
