@@ -14,4 +14,5 @@ def loss_occupancy(prediction, target, sum_loss):
     BCELoss = torch.nn.BCEWithLogitsLoss(weight = t_w, reduction="mean")
     loss = BCELoss(p_classification, t_labels)
     sum_loss[1] += loss.item()
+    #print("occupancy loss", loss)
     return loss
