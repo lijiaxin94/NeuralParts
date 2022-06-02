@@ -18,7 +18,7 @@ def rd_sample_sphere(Batch, num_points, M, dim=3):
 # Output : tensor of size Batch X (more than) num_points X M X dim
 def fx_sample_sphere(Batch, num_points, M, d=3, randperm=True):
 
-    m = int((num_points/2)**0.5) + 2
+    m = int((num_points/2)**0.5) + 1
     if randperm :
         L = [random.shuffle([0.0, 0.0, 1.0]), random.shuffle([0.0, 0.0, -1.0])]
     else :

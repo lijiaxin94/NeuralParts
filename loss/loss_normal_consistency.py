@@ -6,6 +6,7 @@ def loss_normal_consistency(prediction, target, sum_loss):
     t_normals = target[1][:,:,3:] # batch * N_t * 3
 
     gradient_of_G = prediction[2] # batch * N_t * 3, depends on t_pts
+    #print("normal consistency loss", gradient_of_G.requires_grad)
 
     gradient_of_G_norm = gradient_of_G.pow(2).sum(-1).pow(0.5)
     prod = gradient_of_G * t_normals

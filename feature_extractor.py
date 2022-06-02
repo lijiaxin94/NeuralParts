@@ -14,11 +14,11 @@ class FeatureExtractor(torch.nn.Module):
         self.fc1 = torch.nn.Linear(512, 512)
         self.fc2 = torch.nn.Linear(512, self.n_feature)
         self.fe.fc = nn.Sequential(self.fc1, self.fc2)
+        self.fe.avgpool = torch.nn.AdaptiveAvgPool2d((1, 1))
         # learnable primitie embedding
         self.register_parameter(name='p', param=torch.nn.Parameter(torch.randn(n_primitive, n_feature)))
     
     def forward(self, x):
-        
         F = self.fe(x)
         
         F = torch.unsqueeze(F, 1)
