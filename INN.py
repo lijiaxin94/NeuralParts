@@ -24,7 +24,6 @@ class Invertible_Neural_Network(nn.Module):
         self.translation_layer = nn.Sequential(nn.Linear(n_feature, hidden), nn.ReLU(), nn.Linear(hidden, 3))
     
     def forward(self, Cm, x):
-        Cm_ext = (torch.unsqueeze(Cm, dim=1)).expand(-1, x.shape[1], -1, -1)
         #print("Forward : Size of Cm_ext is : " + str(Cm_ext.shape))
         #print("Forward : Size of x is : " + str(x.shape))
         y = x
@@ -53,7 +52,6 @@ class Invertible_Neural_Network(nn.Module):
         return y
     
     def backward(self, Cm, x):
-        Cm_ext = (torch.unsqueeze(Cm, dim=1)).expand(-1, x.shape[1], -1, -1)
         #print("Backward : Size of Cm_ext is : " + str(Cm_ext.shape))
         #print("Backward : Size of x is : " + str(x.shape))
         y = x 
@@ -71,7 +69,7 @@ class Invertible_Neural_Network(nn.Module):
             v = torch.unsqueeze(rot_matx, dim=1).expand(-1, x.shape[1], -1, -1, -1).transpose(-2, -1)
             #print("222 size of v is : " + str(v.shape))
             #print("222 size of y is : " + str(torch.matmul(y.unsqueeze(-2), v).shape))
-            y = torch.matmul(y.unsqueeze(-2), v).squeeze(-2) 
+            y = torch.matmul(u.unsqueeze(-2), v).squeeze(-2) 
             #print("222 size of y is : " + str(y.shape))
         
         if (self.normalize):
@@ -118,6 +116,8 @@ class Conditional_Coupling_Layer(nn.Module):
 
     def forward(self, Cm, point, inv):
         #print("shape of point ",point.shape)
+        B, N, M, D = point.shape
+        assert (D == 3)
         point_nsplit = torch.index_select(point, 3, torch.tensor(self.nsplit).to(self.device))
         point_split = torch.index_select(point, 3, torch.tensor([self.split]).to(self.device))
         if inv :

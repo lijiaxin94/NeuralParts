@@ -31,10 +31,9 @@ def loss_coverage(prediction, target, sum_loss):
     occ = torch.sigmoid((-1 * val / temperature))
     loss = -1 * torch.log(occ + 1e-6).mean()
     
-    
+     
     sum_loss[4] += loss.item()
-
-    #print("coverage loss", loss)
+    assert(loss.requires_grad)
     return loss
 
     
