@@ -22,7 +22,11 @@ class Model_overall(nn.Module):
 
         self.fe = FE.FeatureExtractor(n_feature//2, n_primitive)
         self.INN = INN_mod.Invertible_Neural_Network(n_feature, n_p_theta, n_layer, device)
-        self.points_primitives = None
+
+    def set_new_device(self,device):
+        self.device = device
+        self.INN.set_new_device(device)
+        self.to(device)
 
     def forward(self, x):
         image = x[0]
@@ -35,7 +39,6 @@ class Model_overall(nn.Module):
         inputpoint = inputpoint.to(self.device)
 
         points_primitives = self.INN(Cm, inputpoint)
-        self.points_primitives = points_primitives
 
         points_volume_expanded = volume_samples[:,:,:3].unsqueeze(2).expand(-1,-1,5,-1)
         y_volume = self.INN.backward(Cm, points_volume_expanded)

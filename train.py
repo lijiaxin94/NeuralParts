@@ -24,7 +24,7 @@ def main():
         for b, target in zip(list(range(n_step_per_epoch)), train_dataloader.infinite_iterator()):
             aggregate += 1
             for i in range(len(target)):
-                print(target[i].shape)
+                # print(target[i].shape)
                 target[i] = target[i].to(device)
             prediction = model(target)
             loss = loss_fn(prediction, target, sum_loss)
@@ -37,7 +37,7 @@ def main():
                 aggregate = 0
                 optimizer.zero_grad()
         print("epoch %d, batch: %d, losses: %.5f, %.5f, %.5f, %.5f, %.5f, iou: %.5f, chamferL1: %.5f \r" % (epoch+1, b+1, sum_loss[0]/(b+1), sum_loss[1]/(b+1), sum_loss[2]/(b+1), sum_loss[3]/(b+1), sum_loss[4]/(b+1), sum_metric[0]/(b+1), sum_metric[1]/(b+1)))
-        if (epoch+1) % 10 == 0:
+        if (epoch+1) % 5 == 0:
             print("--------------validation--------------\n")
             sum_loss = [0.,0.,0.,0.,0.]
             sum_metric = [0.,0.]
@@ -51,11 +51,12 @@ def main():
                 metric_fn(prediction, target, sum_metric)
                 sys.stdout.write("batch: %d, losses: %.5f, %.5f, %.5f, %.5f, %.5f, iou: %.5f, chamferL1: %.5f \r" % (b+1, sum_loss[0]/(b+1), sum_loss[1]/(b+1), sum_loss[2]/(b+1), sum_loss[3]/(b+1), sum_loss[4]/(b+1), sum_metric[0]/(b+1), sum_metric[1]/(b+1)))
             optimizer.zero_grad()
+            print("\n")
             if sum_metric[0] > best_validation:
                 best_validation = sum_metric[0]
-                torch.save(model, "model.pth")
+                torch.save(model.state_dict(), "model.pth")
+                print("model saved at iou %.5f"%(sum_metric[0]/(b+1)))
 
-            print("\n")
             print("--------------------------------------")
     
 

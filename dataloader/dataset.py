@@ -1,4 +1,5 @@
 from torch.utils.data import Dataset
+from .datainfo import Datainfo_dfaust
 from config import *
 
 def build_dataset(datatype, splits):

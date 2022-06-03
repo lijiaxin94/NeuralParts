@@ -23,6 +23,13 @@ class Invertible_Neural_Network(nn.Module):
         self.rotation_layer = nn.Sequential(nn.Linear(n_feature, hidden), nn.ReLU(), nn.Linear(hidden, 4))
         self.translation_layer = nn.Sequential(nn.Linear(n_feature, hidden), nn.ReLU(), nn.Linear(hidden, 3))
     
+    def set_new_device(self, device):
+        self.device = device
+        for l in self.layers:
+            l.device = device
+            l.to(device)
+        self.to(device)
+
     def forward(self, Cm, x):
         #print("Forward : Size of Cm_ext is : " + str(Cm_ext.shape))
         #print("Forward : Size of x is : " + str(x.shape))
@@ -143,7 +150,7 @@ class Conditional_Coupling_Layer(nn.Module):
         # x1&x2 : batch_size(4) X numpointsinsphere(200) X n_primitive(5) X dimension(128)
         # Cm_ext : batch_size(4) X numpointsinsphere(200) X n_primitive(5) X size_Cm(512)
         s = self.stheta_layer(Cm, x1)
-        t = self.ttheta_layer(Cm, x2)
+        t = self.ttheta_layer(Cm, x1)
         # s&t : batch_size(4) X numpointsinsphere(200) X n_primitive(5) X 1
         # return val : batch_size(4) X numpointsinsphere(200) X n_primitive(5) X 3
         outputpoint_nsplit = inputpoint_nsplit
@@ -160,7 +167,7 @@ class Conditional_Coupling_Layer(nn.Module):
         #print("size of x1 is : " + str(x1.shape))
         #print("size of Cm is : " + str(Cm.shape))
         s = self.stheta_layer(Cm, x1)
-        t = self.ttheta_layer(Cm, x2)
+        t = self.ttheta_layer(Cm, x1)
         # s&t : batch_size(4) X numpointsinsphere(200) X n_primitive(5) X 1
         # return val : batch_size(4) X numpointsinsphere(200) X n_primitive(5) X 3
         inputpoint_nsplit = outputpoint_nsplit
@@ -221,54 +228,3 @@ class T_Theta_Layer(nn.Module):
         x = self.layer2(x)
         x = self.layer3(x)
         return x
-
-def quaternions_to_rotation_matrices(quaternions):
-    """
-    Arguments:
-    ---------
-        quaternions: Tensor with size ...x4, where ... denotes any shape of
-                     quaternions to be translated to rotation matrices
-
-    Returns:
-    -------
-        rotation_matrices: Tensor with size ...x3x3, that contains the computed
-                           rotation matrices
-    """
-    # Allocate memory for a Tensor of size ...x3x3 that will hold the rotation
-    # matrix along the x-axis
-    shape = quaternions.shape[:-1] + (3, 3)
-    R = quaternions.new_zeros(shape)
-
-    # A unit quaternion is q = w + xi + yj + zk
-    xx = quaternions[..., 1]**2
-    yy = quaternions[..., 2]**2
-    zz = quaternions[..., 3]**2
-    ww = quaternions[..., 0]**2
-    n = (ww + xx + yy + zz).unsqueeze(-1)
-    s = torch.zeros_like(n)
-    s[n != 0] = 2 / n[n != 0]
-
-    xy = s[..., 0] * quaternions[..., 1] * quaternions[..., 2]
-    xz = s[..., 0] * quaternions[..., 1] * quaternions[..., 3]
-    yz = s[..., 0] * quaternions[..., 2] * quaternions[..., 3]
-    xw = s[..., 0] * quaternions[..., 1] * quaternions[..., 0]
-    yw = s[..., 0] * quaternions[..., 2] * quaternions[..., 0]
-    zw = s[..., 0] * quaternions[..., 3] * quaternions[..., 0]
-
-    xx = s[..., 0] * xx
-    yy = s[..., 0] * yy
-    zz = s[..., 0] * zz
-
-    R[..., 0, 0] = 1 - yy - zz
-    R[..., 0, 1] = xy - zw
-    R[..., 0, 2] = xz + yw
-
-    R[..., 1, 0] = xy + zw
-    R[..., 1, 1] = 1 - xx - zz
-    R[..., 1, 2] = yz - xw
-
-    R[..., 2, 0] = xz - yw
-    R[..., 2, 1] = yz + xw
-    R[..., 2, 2] = 1 - xx - yy
-
-    return R

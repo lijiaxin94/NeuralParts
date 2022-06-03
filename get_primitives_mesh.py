@@ -9,26 +9,26 @@ from dataloader.dataset import build_dataset
 import os, sys
 
 def get_primitives_mesh():
-    device =  torch.device('cuda:0' if torch.cuda.is_available() else 'cpu' )
-    model = torch.load("model.pth").to(device)
-    target = build_dataset('dfaust', [0.7, 0.2, 0.1]).get(0)
+    device =  torch.device('cpu')
+    model = Model(device)
+    model.load_state_dict(torch.load("model.pth", map_location=device))
+    model.set_new_device(device)
+    target = build_dataset('dfaust', ['train']).get(1)
     for i in range(len(target)):
         target[i] = target[i].to(device)
     prediction = model(target)
-        # --------------- Only for debugging ----------------
-    r = True 
-    if r:
-        p_p = model.points_primitives #batch * 222 *n_primitives * 3
-        print(str(p_p == None))
-        r = False
-        # --------------- Only for debugging ----------------
+    p_p = prediction[0]
     B, n_points, n_primitives, D = p_p.shape
     assert (D == 3)
     face = (gs.fx_sample_face(B, n_points, n_primitives, d=3, randperm=False))
+    print("face shape is : " + str(len(face)) + " * " + str(len(face[0])))
+    print("face is : " + str(face))
     print("number of primitives : " + str(n_primitives))
-    for j in range(3):
-        r = trimesh.Trimesh(p_p[0, :, j, :], face)
-        r.export(file_obj=".", file_type='obj')
+    for j in range(n_primitives):
+        c = p_p[0, :, j, :].cpu().detach().numpy()
+        print("shape of c is : " + str(len(c)) + " * " + str(len(c[0])))
+        r = trimesh.Trimesh(c, face)
+        r.export(file_obj=("./mesh_00" + str(j) + ".obj"), file_type='obj')
 
 get_primitives_mesh()
 

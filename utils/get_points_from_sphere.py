@@ -55,17 +55,17 @@ def fx_sample_face(Batch, num_points, M, d=3, randperm=True):
             else:
                 L.append(pt)
             if (i == 1):
-                f.append([lenL, lenL+(j+1), lenL+((j+2)%(2*m))])
+                f.append([lenL-1, lenL+(j), lenL+((j+1)%(2*m))])
             else:
-                f.append([lenL-(2*m)+(j+1), lenL+(j+1), lenL+1+((j+1)%(2*m))])
-                f.append([lenL-(2*m)+(j+1), lenL-(2*m)+1+((j+1)%(2*m)), lenL+1+((j+1)%(2*m))])
+                f.append([lenL-(2*m)+(j), lenL+(j), lenL+((j+1)%(2*m))])
+                f.append([lenL-(2*m)+(j), lenL-(2*m)+((j+1)%(2*m)), lenL+((j+1)%(2*m))])
     if randperm : 
         L.append(random.shuffle([0.0, 0.0, -1.0]))
     else:
         L.append([0.0, 0.0, -1.0])
     lenl = len(L)
     for j in range(0, 2*m):
-        f.append([lenl - (2*m) + j, lenl - (2*m) + ((j+1)%(2*m)), lenl])
+        f.append([lenl - (2*m) + j - 1, lenl - (2*m) + ((j+1)%(2*m)) - 1, lenl - 1])
     return f
     
 
