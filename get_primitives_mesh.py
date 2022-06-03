@@ -16,13 +16,15 @@ def get_primitives_mesh():
     target = build_dataset('dfaust', ['train']).get(1)
     for i in range(len(target)):
         target[i] = target[i].to(device)
-    prediction = model(target)
-    p_p = prediction[0]
+    num_points = 40 ** 2 - 40 * 2 + 2
+    prediction = model.primitive_points(target, num_points)
+    print(prediction.shape)
+    p_p = prediction
     B, n_points, n_primitives, D = p_p.shape
     assert (D == 3)
-    face = (gs.fx_sample_face(B, n_points, n_primitives, d=3, randperm=False))
+    face = (gs.fx_sample_face(B, num_points, n_points, d=3, randperm=False))
     print("face shape is : " + str(len(face)) + " * " + str(len(face[0])))
-    print("face is : " + str(face))
+    #print("face is : " + str(face))
     print("number of primitives : " + str(n_primitives))
     for j in range(n_primitives):
         c = p_p[0, :, j, :].cpu().detach().numpy()

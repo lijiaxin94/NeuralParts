@@ -35,7 +35,9 @@ class Model_overall(nn.Module):
 
         Cm = self.fe(image)
         Batch = Cm.shape[0]
-        inputpoint = gs.fx_sample_sphere(Batch, self.n_points, self.n_primitive, randperm=False) * sphere_radius
+        inputpoint = gs.fx_sample_sphere(Batch, 2 * 60 ** 2 - 2 * 60 + 2, self.n_primitive, randperm=False) * sphere_radius
+        inputpoint = inputpoint[:,torch.randperm(inputpoint.shape[1]),:,:]
+        inputpoint = inputpoint[:,:self.n_points,:,:]
         inputpoint = inputpoint.to(self.device)
 
         points_primitives = self.INN(Cm, inputpoint)
@@ -53,6 +55,21 @@ class Model_overall(nn.Module):
         gradient_G_surface = torch.autograd.grad(G_surface.sum(), points_surface, retain_graph=True, create_graph=True)[0]
 
         return [points_primitives, g_m_volume, gradient_G_surface]
+
+
+    def primitive_points(self, x, n):
+        image = x[0]
+        surface_samples = x[1]
+        volume_samples = x[2]
+
+        Cm = self.fe(image)
+        Batch = Cm.shape[0]
+        inputpoint = gs.fx_sample_sphere(Batch, n, self.n_primitive, randperm=False) * sphere_radius
+        inputpoint = inputpoint.to(self.device)
+
+        points_primitives = self.INN(Cm, inputpoint)
+
+        return points_primitives
 
     def eval(self, x):
         image = x[0]

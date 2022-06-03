@@ -16,7 +16,8 @@ class Invertible_Neural_Network(nn.Module):
         self.n_layer = n_layer
         self.split = [random.choice([0, 1, 2]) for i in range(n_layer)]
         self.device = device
-        self.layers = [Conditional_Coupling_Layer(n_feature, n_p_theta, self.split[i], self.device) for i in range(n_layer)]
+        PPP = P_Theta_Layer(output_size=n_p_theta)
+        self.layers = [Conditional_Coupling_Layer(n_feature, n_p_theta, self.split[i], self.device, PPP) for i in range(n_layer)]
         self.normalize = normalize
         self.explicit_affine = explicit_affine
         self.normalize_layer = nn.Sequential(nn.Linear(n_feature, hidden), nn.ReLU(), nn.Linear(hidden, 3))
@@ -98,7 +99,7 @@ class Conditional_Coupling_Layer(nn.Module):
     #   inputpoint_nsplit : batch_size(4) X numpointsinsphere(200) X n_primitive(5) X dimension(2)
     #   inputpoint_split : batch_size(4) X numpointsinsphere(200) X n_primitive(5) X dimension(1)
 
-    def __init__(self, n_feature, n_p_theta, split, device, hidden=256):
+    def __init__(self, n_feature, n_p_theta, split, device, player, hidden=256):
         # split = 0 -> split x / split = 1 -> split y / split 2 -> split z
         super().__init__()
         self.split = split
@@ -111,13 +112,11 @@ class Conditional_Coupling_Layer(nn.Module):
             self.nsplit = [0, 1]
         else:
             raise NotImplementedError
-        self.ptheta_layer1 = P_Theta_Layer(output_size=n_p_theta)
-        self.ptheta_layer2 = P_Theta_Layer(output_size=n_p_theta)
+        self.ptheta_layer1 = player #P_Theta_Layer(output_size=n_p_theta)
         self.stheta_layer = S_Theta_Layer(n_feature+n_p_theta, hidden=hidden)
         self.ttheta_layer = T_Theta_Layer(n_feature+n_p_theta, hidden=hidden)
         self.device = device
         self.ptheta_layer1.to(self.device)
-        self.ptheta_layer2.to(self.device)
         self.stheta_layer.to(self.device)
         self.ttheta_layer.to(self.device)
 
