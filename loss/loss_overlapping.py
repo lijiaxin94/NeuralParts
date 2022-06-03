@@ -14,7 +14,7 @@ def loss_overlapping(prediction, target, sum_loss):
     # sum_values : batch * N
     loss = (sum_values - max_shared_pts).relu().mean()
     sum_loss[3] += loss.item()
-    #print("overlapping loss", loss)
+    assert(loss.requires_grad)
     return loss
 
     

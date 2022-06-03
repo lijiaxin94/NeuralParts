@@ -81,13 +81,14 @@ def save_mesh():
             print("saved on ", tdir)
 
 def get_train_datainfo():
+    split = ["train","val"]
     datainfo_split = []
     with open(dfaust_split_file, "r") as f:
         data = np.array([row for row in csv.reader(f)])
-        s = 'train'
-        s_data = data[data[:,2]==s]
-        for d, l in zip(s_data[:, 0], s_data[:, 1]):
-            datainfo_split.append(d + ':' + l)
+        for s in split:
+            s_data = data[data[:,2]==s]
+            for d, l in zip(s_data[:, 0], s_data[:, 1]):
+                datainfo_split.append(d + ':' + l)
     return set(datainfo_split)
 
 def save_surface_samples():
@@ -108,15 +109,14 @@ def save_surface_samples():
                     print('delete file that is not mesh ' + mesh_file_path)
                     os.remove(mesh_file_path)
                     continue
-                # we will normalize only the train data (by lack of disk..)
                 if (sidseq + ':' + mesh_file_name[:-4]) not in datainfo_split:
-                    if os.path.exists(join(tdir,mesh_file_name[:-4]+'.npy')):
-                        os.remove(join(tdir,mesh_file_name[:-4]+'.npy'))
+                #     if os.path.exists(targetpath):
+                #         os.remove(targetpath)
                     continue
                 # we don't normalize D-FAUST data
                 mesh = trimesh.load(mesh_file_path, process=False)
                 p, f = trimesh.sample.sample_surface(mesh,
-                        dfaust_n_preprocessed_surface_samples)
+                        n_preprocessed_surface_samples)
                 face_normals = np.array(mesh.face_normals)
                 samples = np.hstack([p, face_normals[f,:]])
                 np.random.shuffle(samples)
@@ -176,20 +176,23 @@ def save_volume_samples():
             for mesh_file_name in os.listdir(mdir):
                 targetpath = join(tdir,mesh_file_name[:-4]+'.npz')
                 if (sidseq + ':' + mesh_file_name[:-4]) not in datainfo_split:
-                    if os.path.exists(targetpath):
-                        os.remove(targetpath)
+                #     if os.path.exists(targetpath):
+                #         os.remove(targetpath)
                     continue
                 meshpath = join(mdir, mesh_file_name)
                 mesh = trimesh.load(meshpath, process=False)
-                points = np.random.rand(n_preprocessed_volume_samples, 
-                        3).astype(np.float32) - 0.5
+                points = (np.random.rand(n_preprocessed_volume_samples, 
+                        3)*np.array([1.,2.,1.]) - np.array([0.5, 0.75, 0.5])).astype(np.float32)
                 labels = check_mesh_contains(mesh, points).astype(np.float32)[:, None]
                 np.savez(targetpath, points=points, occupancies=labels[:,0])
+                sys.stdout.write("%.5f \r"%(np.sum(labels)))
             print("saved volume samples on ", tdir)
 
 
 if __name__ == '__main__':
-    save_mesh()
+    #delete_folders("volume_samples")
+    #delete_folders("surface_samples")
+    #save_mesh()
     save_surface_samples()
-    save_images()
-    save_volume_samples()
+    #save_images()
+    #save_volume_samples()

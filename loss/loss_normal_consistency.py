@@ -13,6 +13,7 @@ def loss_normal_consistency(prediction, target, sum_loss):
     prod_sum = prod.sum(-1)
     loss = 1 - (prod_sum/gradient_of_G_norm).mean()
     sum_loss[2] += loss.item()
+    assert(loss.requires_grad)
     return loss
 
 

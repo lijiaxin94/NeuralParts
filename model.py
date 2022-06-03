@@ -23,6 +23,11 @@ class Model_overall(nn.Module):
         self.fe = FE.FeatureExtractor(n_feature//2, n_primitive)
         self.INN = INN_mod.Invertible_Neural_Network(n_feature, n_p_theta, n_layer, device)
 
+    def set_new_device(self,device):
+        self.device = device
+        self.INN.set_new_device(device)
+        self.to(device)
+
     def forward(self, x):
         image = x[0]
         surface_samples = x[1]
