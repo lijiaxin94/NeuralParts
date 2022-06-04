@@ -14,7 +14,7 @@ class Invertible_Neural_Network(nn.Module):
         self.n_feature = n_feature
         self.n_p_theta = n_p_theta
         self.n_layer = n_layer
-        self.split = [random.choice([0, 1, 2]) for i in range(n_layer)] #[i%3 for i in range(n_layer)]
+        self.split = [i%3 for i in range(n_layer)]#[random.choice([0, 1, 2]) for i in range(n_layer)] #
         self.device = device
         PPP = P_Theta_Layer(output_size=n_p_theta)
 
