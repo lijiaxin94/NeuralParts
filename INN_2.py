@@ -14,7 +14,7 @@ class Invertible_Neural_Network(nn.Module):
         self.n_feature = n_feature
         self.n_p_theta = n_p_theta
         self.n_layer = n_layer
-        self.split = [i%3 for i in range(n_layer)]#[random.choice([0, 1, 2]) for i in range(n_layer)] #
+        self.split = [random.choice([0, 1, 2]) for i in range(n_layer)] #[i%3 for i in range(n_layer)]
         self.device = device
         PPP = P_Theta_Layer(output_size=n_p_theta)
 
@@ -104,16 +104,13 @@ class Conditional_Coupling_Layer(nn.Module):
         #print("coupling layer with split ", self.split, "got point ", point[0,0,0,:])
         B, N, M, D = point.shape
         assert (D == 3)
-        point_nsplit = self.nsplit * point 
-        point_split = (((1-self.nsplit) * point)[:, :, :, self.split]).unsqueeze(-1)
-        #print("point_split size is : " + str(point_split.shape))
+        point_nsplit = point * self.nsplit
         if inv :
-            newpoint_split = self.backward_sub(Cm, point_nsplit, point_split)
+            newpoint_split = self.backward_sub(Cm, point_nsplit, point)
         else :
-            newpoint_split = self.forward_sub(Cm, point_nsplit, point_split)
+            newpoint_split = self.forward_sub(Cm, point_nsplit, point)
 
-        #print("newpoint_split size is : " + str(newpoint_split.shape))
-        result = point_nsplit + (1 - self.nsplit) * (newpoint_split.expand(-1, -1, -1, 3))
+        result = point_nsplit + (1 - self.nsplit) * newpoint_split
         
         #print("result of coupling layer ", result[0,0,0,:])
         return result
@@ -122,22 +119,22 @@ class Conditional_Coupling_Layer(nn.Module):
         x = self.ptheta_layer(inputpoint_nsplit)
         s = self.stheta_layer(Cm, x)
         t = self.ttheta_layer(Cm, x)
-        #print("backward : s size is : " + str(s.shape))
-        #print("backward : t size is : " + str(t.shape))
-        #print("backward : inputpoint size is : " + str(inputpoint.shape))
+        print("backward : s size is : " + str(s.shape))
+        print("backward : t size is : " + str(t.shape))
+        print("backward : inputpoint size is : " + str(inputpoint.shape))
         outputpoint_split = t + (inputpoint * torch.exp(s))
-        #print("backward : outputpoint size is : " + str(outputpoint_split.shape))
+        print("backward : outputpoint size is : " + str(outputpoint_split.shape))
         return outputpoint_split 
 
     def forward_sub(self, Cm, outputpoint_nsplit, outputpoint):
         x = self.ptheta_layer(outputpoint_nsplit)
         s = self.stheta_layer(Cm, x)
         t = self.ttheta_layer(Cm, x)
-        #print("forward : s size is : " + str(s.shape))
-        #print("forward : t size is : " + str(t.shape))
-        #print("forward : inputpoint size is : " + str(outputpoint.shape))
+        print("forward : s size is : " + str(s.shape))
+        print("forward : t size is : " + str(t.shape))
+        print("forward : inputpoint size is : " + str(outputpoint.shape))
         inputpoint_split = (outputpoint - t) * torch.exp((-1) * s)
-        #print("forward : outputpoint size is : " + str(inputpoint_split.shape))
+        print("forward : outputpoint size is : " + str(inputpoint_split.shape))
 
         return inputpoint_split
         
@@ -160,7 +157,7 @@ class P_Theta_Layer(nn.Module):
 class S_Theta_Layer(nn.Module):
 
     def __init__(self, input_dim, hidden=256):
-        hidden1, hidden2, hidden3 = hidden, hidden, 1
+        hidden1, hidden2, hidden3 = hidden, hidden, 3
         super().__init__()
         self.layer1 = nn.Sequential(nn.Linear(input_dim, hidden1), nn.ReLU())
         self.layer2 = nn.Sequential(nn.Linear(hidden1, hidden2), nn.ReLU())
@@ -181,7 +178,7 @@ class S_Theta_Layer(nn.Module):
 class T_Theta_Layer(nn.Module):
 
     def __init__(self, input_dim, hidden=256):
-        hidden1, hidden2, hidden3 = hidden, hidden, 1
+        hidden1, hidden2, hidden3 = hidden, hidden, 3
         super().__init__()
         self.layer1 = nn.Sequential(nn.Linear(input_dim, hidden1), nn.ReLU())
         self.layer2 = nn.Sequential(nn.Linear(hidden1, hidden2), nn.ReLU())
