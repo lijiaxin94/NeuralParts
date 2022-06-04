@@ -27,6 +27,6 @@ class FeatureExtractor(torch.nn.Module):
         P = torch.unsqueeze(self.p, 0)
         P = P.expand(F.shape[0], -1, -1) # should have size 4 * 5 * 256
 
-        C = torch.cat([F,P], dim=2)
+        C = torch.cat([F,P], dim=-1)
 
         return C

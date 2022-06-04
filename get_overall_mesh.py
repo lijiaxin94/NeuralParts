@@ -7,6 +7,7 @@ from metric.metric_function import metric_function
 import utils.get_points_from_sphere as gs
 from dataloader.dataset import build_dataset
 import os, sys
+import matplotlib.pyplot as plt
 
 def get_overall_mesh():
     device =  torch.device('cpu')
@@ -15,6 +16,9 @@ def get_overall_mesh():
     model.set_new_device(device)
     #model = Model(device)
     target = build_dataset('dfaust', ['train']).get(1)
+    sampled_surface = target[1][0]
+    plt.scatter(sampled_surface[:,0], sampled_surface[:,1], s=1)
+    plt.savefig("surface_sample_plot.png")
     for i in range(len(target)):
         target[i] = target[i].to(device)
     num_points = 40 ** 2 - 40 * 2 + 2
