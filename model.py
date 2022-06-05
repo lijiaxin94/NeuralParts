@@ -42,13 +42,13 @@ class Model_overall(nn.Module):
 
         points_primitives = self.INN(Cm, inputpoint)
 
-        points_volume_expanded = volume_samples[:,:,:3].unsqueeze(2).expand(-1,-1,5,-1)
+        points_volume_expanded = volume_samples[:,:,:3].unsqueeze(2).expand(-1,-1,n_primitive,-1)
         y_volume = self.INN.backward(Cm, points_volume_expanded)
         g_m_volume = y_volume.pow(2).sum(3).pow(0.5) - sphere_radius
 
         points_surface = surface_samples[:,:,:3]
         points_surface.requires_grad_()
-        points_surface_expanded = points_surface.unsqueeze(2).expand(-1,-1,5,-1)
+        points_surface_expanded = points_surface.unsqueeze(2).expand(-1,-1,n_primitive,-1)
         y_surface = self.INN.backward(Cm, points_surface_expanded)
         g_m_surface = y_surface.pow(2).sum(-1).pow(0.5) - sphere_radius
         G_surface = g_m_surface.min(-1)[0]

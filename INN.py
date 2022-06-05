@@ -62,6 +62,8 @@ class Invertible_Neural_Network(nn.Module):
             rot_quart_norm = rot_quart / torch.sqrt(torch.sum(torch.square(rot_quart), dim=-1, keepdim=True))
             rot_matx = quaternion_to_matrix(rot_quart_norm)
             trans_matx = torch.unsqueeze(self.translation_layer(Cm), dim=1).expand(-1, x.shape[1], -1, -1)
+            #print("y shape", y.shape)
+            #print("trans mat shape", trans_matx.shape)
             u = (y - trans_matx)
             v = torch.unsqueeze(rot_matx, dim=1).expand(-1, x.shape[1], -1, -1, -1).transpose(-2, -1)
             #print("bbb : size of u is : " + str(u.shape))
