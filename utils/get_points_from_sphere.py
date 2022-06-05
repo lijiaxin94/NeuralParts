@@ -70,3 +70,5 @@ def fx_sample_face(Batch, num_points, M, d=3, randperm=True):
     
 
 
+
+
