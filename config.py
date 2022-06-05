@@ -9,11 +9,11 @@ max_shared_pts = 1.95
 sphere_radius = 0.25
 n_points_coverage = 10
 learning_rate = 0.0001
-n_epoch = 200
+n_epoch = 300
 n_step_per_epoch = 500
 n_aggregate = 2
-n_primitive = 2
-batch_size = 6
+n_primitive = 5
+batch_size = 4
 
 dfaust_dataset_directory = '/data/D-FAUST'
 dfaust_split_file = '/data/dfaust_split.csv'
