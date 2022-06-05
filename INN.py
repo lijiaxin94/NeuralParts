@@ -50,6 +50,8 @@ class Invertible_Neural_Network(nn.Module):
             rot_matx = quaternion_to_matrix(rot_quart_norm)
             trans_matx = torch.unsqueeze(self.translation_layer(Cm), dim=1).expand(-1, x.shape[1], -1, -1)
             u = torch.unsqueeze(rot_matx, dim=1).expand(-1, x.shape[1], -1, -1, -1)
+            #print("fff : size of u is : " + str(u.shape))
+            #print("fff : size of y is : " + str(y.shape))
             y = torch.matmul(y.unsqueeze(-2), u).squeeze(-2) + trans_matx
         return y
     
@@ -62,6 +64,8 @@ class Invertible_Neural_Network(nn.Module):
             trans_matx = torch.unsqueeze(self.translation_layer(Cm), dim=1).expand(-1, x.shape[1], -1, -1)
             u = (y - trans_matx)
             v = torch.unsqueeze(rot_matx, dim=1).expand(-1, x.shape[1], -1, -1, -1).transpose(-2, -1)
+            #print("bbb : size of u is : " + str(u.shape))
+            #print("bbb : size of v is : " + str(v.shape))
             y = torch.matmul(u.unsqueeze(-2), v).squeeze(-2) 
         
         if (self.normalize):
@@ -118,7 +122,7 @@ class Conditional_Coupling_Layer(nn.Module):
         #print("result of coupling layer ", result[0,0,0,:])
         return result
     
-    def backward_sub(self, Cm, inputpoint_nsplit, inputpoint):
+    def forward_sub(self, Cm, inputpoint_nsplit, inputpoint):
         x = self.ptheta_layer(inputpoint_nsplit)
         s = self.stheta_layer(Cm, x)
         t = self.ttheta_layer(Cm, x)
@@ -129,7 +133,7 @@ class Conditional_Coupling_Layer(nn.Module):
         #print("backward : outputpoint size is : " + str(outputpoint_split.shape))
         return outputpoint_split 
 
-    def forward_sub(self, Cm, outputpoint_nsplit, outputpoint):
+    def backward_sub(self, Cm, outputpoint_nsplit, outputpoint):
         x = self.ptheta_layer(outputpoint_nsplit)
         s = self.stheta_layer(Cm, x)
         t = self.ttheta_layer(Cm, x)

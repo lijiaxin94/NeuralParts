@@ -11,9 +11,9 @@ import os, sys
 def get_primitives_mesh():
     device =  torch.device('cpu')
     model = Model(device)
-    model.load_state_dict(torch.load("model.pth", map_location=device))
+    model.load_state_dict(torch.load("best_model.pth", map_location=device))
     model.set_new_device(device)
-    target = build_dataset('dfaust', ['train']).get(1)
+    target = build_dataset('dfaust', ['train']).get(6000)
     for i in range(len(target)):
         target[i] = target[i].to(device)
     num_points = 40 ** 2 - 40 * 2 + 2
