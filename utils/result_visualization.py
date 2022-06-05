@@ -40,7 +40,7 @@ def visualize_result(index, mesh_file_name, original_mesh_rendered, mesh_rendere
     trimesh.util.concatenate(Listmesh).export(file_obj=(mesh_file_name), file_type='obj')
     render_mesh(mesh_file_name, mesh_rendered)
     render_mesh(mesh_path, original_mesh_rendered)
-    printf("done")
+    print("done")
 
 def get_scene():
     scene = Scene((1024, 1024))
