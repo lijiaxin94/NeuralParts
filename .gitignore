@@ -8,3 +8,15 @@ result/
 *.pth
 *.png
 *.obj
+
+!models/trained_model_2_prim.pth
+!models/trained_model_5_prim.pth
+!models/trained_model_8_prim.pth
+!models/trained_model_10_prim.pth
+
+
+!models/trained_model_5_prim_wo_rec.pth
+!models/trained_model_5_prim_wo_occ.pth
+!models/trained_model_5_prim_wo_norm.pth
+!models/trained_model_5_prim_wo_overlap.pth
+!models/trained_model_5_prim_wo_cover.pth

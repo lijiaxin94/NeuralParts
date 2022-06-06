@@ -28,9 +28,16 @@ class Datainfo_dfaust(Datainfo_base):
         datainfo_local = []
         for d in sorted(os.listdir(dfaust_dataset_directory)):
             if '.hdf5' in d: continue
-            for l in sorted(os.listdir(os.path.join(
-                dfaust_dataset_directory, d, dfaust_mesh_folder)))[20:]:
-                datainfo_local.append((d + ':' +l[:-4]))
+            d_sid = sorted(os.listdir(os.path.join(
+                dfaust_dataset_directory, d, dfaust_mesh_folder)))
+            if len(d_sid) > 20:
+                for l in d_sid[20:]:
+                    datainfo_local.append((d + ':' +l[:-4]))
+            else:
+                print("The local data is not big enough to train or evaluate")
+                for l in d_sid:
+                    datainfo_local.append((d + ':' +l[:-4]))
+
         print("found " + str(len(datainfo_local)) + " D-FAUST dataset from local")
 
         datainfo_split = []
