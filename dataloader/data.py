@@ -26,8 +26,9 @@ class Data_base():
         return F(raw_image.float() / 255.0).float()
 
     def get_surface_samples(self):
-        n_pre, n_sample = n_preprocessed_surface_samples, n_surface_samples
+        n_sample = n_surface_samples
         pre_sampled = np.load(self.path_to_surface_samples(), mmap_mode="r")
+        n_pre = pre_sampled.shape[0]
         rand = int(np.random.rand() * (n_pre - n_sample))
         sampled_surface = torch.from_numpy(np.array(
             pre_sampled[rand:rand+n_sample]).astype(np.float32))

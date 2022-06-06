@@ -5,9 +5,11 @@ from loss.loss_function import loss_function
 from metric.metric_function import metric_function
 import os, sys
 
-def main():
+def main(model_path):
     device =  torch.device('cuda:0' if torch.cuda.is_available() else 'cpu' )
-    model = torch.load("model.pth").to(device)
+    model = Model(device)
+    model.load_state_dict(torch.load(model_path, map_location=device))
+    model.set_new_device(device)
     test_dataloader = build_dataloader('dfaust',['test'])
     loss_fn = loss_function
     metric_fn = metric_function
@@ -27,7 +29,9 @@ def main():
     print("--------------------------------------")
 
 
-    return pred 
-
-if __name__=='__main__'
-main()
+if __name__=='__main__':
+    if (len(sys.argv) < 2):
+        model_path = "./models/trained_model_5_prim.pth"
+    else:
+        model_path = sys.argv[1]
+    main(model_path)

@@ -81,7 +81,7 @@ def save_mesh():
             print("saved on ", tdir)
 
 def get_train_datainfo():
-    split = ["train","val"]
+    split = ["train", "val", "test"]
     datainfo_split = []
     with open(dfaust_split_file, "r") as f:
         data = np.array([row for row in csv.reader(f)])
@@ -109,11 +109,11 @@ def save_surface_samples():
                     print('delete file that is not mesh ' + mesh_file_path)
                     os.remove(mesh_file_path)
                     continue
-                if (sidseq + ':' + mesh_file_name[:-4]) not in datainfo_split:
-                #     if os.path.exists(targetpath):
-                #         os.remove(targetpath)
+                if os.path.exists(join(tdir,mesh_file_name[:-4]+'.npy')):
                     continue
-                # we don't normalize D-FAUST data
+                # we don't normalize D-FAUST data   
+                if (sidseq + ':' + mesh_file_name[:-4]) not in datainfo_split:
+                    continue
                 mesh = trimesh.load(mesh_file_path, process=False)
                 p, f = trimesh.sample.sample_surface(mesh,
                         n_preprocessed_surface_samples)
@@ -124,7 +124,7 @@ def save_surface_samples():
 
             print("saved on ", tdir)
 
-# for rendering we refer to code of https://github.com/paschalidoud/hierarchical_primitives
+# for rendering we refer to code of render_dfaust.py of https://github.com/paschalidoud/hierarchical_primitives
 def render_dfaust(scene, prev_renderable, seq, target):
     new_renderable = Mesh.from_file(seq)
     scene.remove(prev_renderable)
@@ -161,6 +161,7 @@ def save_images():
                 renderable = render_dfaust(scene, renderable, meshpath, imagepath)
             print("saved images on ", tdir)
 
+# this part used the code from https://github.com/autonomousvision/occupancy_networks/blob/ddb2908f96de9c0c5a30c093f2a701878ffc1f4a/im2mesh/utils/libmesh/inside_mesh.py
 def save_volume_samples():
     datainfo_split = get_train_datainfo()
     for i in range(len(sids)):
@@ -175,9 +176,9 @@ def save_volume_samples():
                 mkdir(tdir)
             for mesh_file_name in os.listdir(mdir):
                 targetpath = join(tdir,mesh_file_name[:-4]+'.npz')
+                if os.path.exists(targetpath):
+                    continue
                 if (sidseq + ':' + mesh_file_name[:-4]) not in datainfo_split:
-                #     if os.path.exists(targetpath):
-                #         os.remove(targetpath)
                     continue
                 meshpath = join(mdir, mesh_file_name)
                 mesh = trimesh.load(meshpath, process=False)
@@ -190,9 +191,7 @@ def save_volume_samples():
 
 
 if __name__ == '__main__':
-    #delete_folders("volume_samples")
-    #delete_folders("surface_samples")
-    #save_mesh()
+    save_mesh()
     save_surface_samples()
-    #save_images()
-    #save_volume_samples()
+    save_images()
+    save_volume_samples()
